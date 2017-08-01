@@ -1,0 +1,22 @@
+{
+  "name": "ionic-discover",
+  "version": "0.0.1",
+  "description": "Simple UDP based protocol for service discovery implemented in pure JS. Not mDNS or bonjour. ",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rimraf ./dist",
+    "watch": "npm run clean && tsc --watch & npm run sass-watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "netmask": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.18",
+    "rimraf": "^2.6.1",
+    "tslint-ionic-rules": "0.0.11",
+    "typescript": "^2.4.2"
+  }
+}
