@@ -1,5 +1,5 @@
 {
-  "name": "ionic-discover",
+  "name": "@ionic/discover",
   "version": "0.0.1",
   "description": "Simple UDP based protocol for service discovery implemented in pure JS. Not mDNS or bonjour. ",
   "main": "dist/index.js",
@@ -14,7 +14,10 @@
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rimraf ./dist",
-    "watch": "npm run clean && tsc --watch & npm run sass-watch"
+    "watch": "npm run clean && tsc --watch & npm run sass-watch",
+    "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
+    "github-release": "node ./scripts/create-github-release.js",
+    "nightly": "npm run build && node ./scripts/publish-nightly.js"
   },
   "dependencies": {
     "netmask": "^1.0.6"
