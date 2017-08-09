@@ -2,6 +2,9 @@ const os = require('os');
 const dgram = require('dgram');
 const Netmask = require('netmask').Netmask
 
+const PREFIX = 'ION_DP';
+const PORT = 41234;
+
 export interface Interface {
   address: string;
   netmask: string;
@@ -57,13 +60,21 @@ export class Publisher {
 
   private getMessage(iface: Interface): string {
     const now = Date.now();
-    return ['ION_DP', now, this.id, this.name, iface.address, this.port].join(':');
+    const message = {
+      t: now,
+      id: this.id+'',
+      name: this.name,
+      host: os.hostname(),
+      ip: iface.address,
+      port: this.port
+    };
+    return PREFIX + JSON.stringify(message);
   }
 
   private sayHello() {
     for (let iface of this.getInterfaces()) {
       const message = new Buffer(this.getMessage(iface));
-      this.client.send(message, 0, message.length, 41234, iface.broadcast);
+      this.client.send(message, 0, message.length, PORT, iface.broadcast);
     }
   }
 
@@ -72,7 +83,7 @@ export class Publisher {
     const interfaces: any = os.networkInterfaces();
     return Object.keys(interfaces)
       // filter ipv6 and internal interfaces
-      .map(key => interfaces[key].find((i: any) => i.internal === false && i.family === 'IPv4'))
+      .map(key => interfaces[key].find((i: any) => i.family === 'IPv4'))
       .filter(iface => !!iface)
       .map((iface) => {
         const i = Object.assign({}, iface);
