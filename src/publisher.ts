@@ -1,6 +1,6 @@
 const os = require('os');
 const dgram = require('dgram');
-const Netmask = require('netmask').Netmask
+const Netmask = require('netmask').Netmask;
 
 const PREFIX = 'ION_DP';
 const PORT = 41234;
@@ -35,7 +35,7 @@ export class Publisher {
     }
     this.running = true;
 
-    const client = this.client = dgram.createSocket("udp4");
+    const client = this.client = dgram.createSocket('udp4');
     client.on('listening', () => {
       client.setBroadcast(true);
       this.timer = setInterval(this.sayHello.bind(this), this.interval);
