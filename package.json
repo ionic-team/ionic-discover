@@ -1,6 +1,6 @@
 {
   "name": "@ionic/discover",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simple UDP based protocol for service discovery implemented in pure JS. Not mDNS or bonjour. ",
   "main": "dist/index.js",
   "homepage": "https://ionicframework.com/",
@@ -17,17 +17,21 @@
     "watch": "npm run clean && tsc --watch & npm run sass-watch",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "github-release": "node ./scripts/create-github-release.js",
+    "test": "jest",
     "nightly": "npm run build && node ./scripts/publish-nightly.js"
   },
   "dependencies": {
     "netmask": "^1.0.6"
   },
   "devDependencies": {
+    "@types/jest": "^20.0.8",
     "@types/node": "^8.0.18",
     "conventional-changelog-cli": "^1.3.2",
     "github": "^9.2.0",
     "ionic-cz-conventional-changelog": "^1.0.0",
+    "jest": "^20.0.4",
     "rimraf": "^2.6.1",
+    "tslint": "^5.6.0",
     "tslint-ionic-rules": "0.0.11",
     "typescript": "^2.4.2"
   },
@@ -43,5 +47,17 @@
       "path": "node_modules/ionic-cz-conventional-changelog"
     }
   },
-  "typings": "dist/index.d.ts"
+  "typings": "dist/index.d.ts",
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.(ts)$": "<rootDir>/preprocessor.js"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testRegex": "/src/.*\\.spec\\.(ts|js)$",
+    "coverageDirectory": "coverage"
+  }
 }

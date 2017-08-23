@@ -7,32 +7,29 @@ const PORT = 41234;
 
 export interface Interface {
   address: string;
-  netmask: string;
-  family: string;
-  mac: string;
-  internal: boolean;
   broadcast: string;
 }
 
 export class Publisher {
 
-  private running: boolean = false;
-  private timer: any;
-  private client: any;
-  private id: number;
+  running: boolean = false;
+  timer: any = null;
+  client: any = null;
+  id: string;
 
   constructor(
-    private name: string,
-    private port: number,
-    private interval: number = 2000
+    public namespace: string,
+    public name: string,
+    public port: number,
+    public interval: number = 2000
   ) {
     if (name.indexOf(':') >= 0) {
       throw new Error('name can not contain ":"');
     }
-    this.id = Math.round(Math.random() * 1000000);
+    this.id = Math.round(Math.random() * 1000000) + '';
   }
 
-  start() {
+  start(callback?: Function) {
     if (this.running) {
       return;
     }
@@ -42,6 +39,8 @@ export class Publisher {
     client.on('listening', () => {
       client.setBroadcast(true);
       this.timer = setInterval(this.sayHello.bind(this), this.interval);
+      this.sayHello();
+      callback && callback();
     });
     client.bind();
   }
@@ -58,14 +57,15 @@ export class Publisher {
     this.client = null;
   }
 
-  private getMessage(iface: Interface): string {
+  buildMessage(address: string): string {
     const now = Date.now();
     const message = {
       t: now,
-      id: this.id+'',
+      id: this.id,
+      nspace: this.namespace,
       name: this.name,
       host: os.hostname(),
-      ip: iface.address,
+      ip: address,
       port: this.port
     };
     return PREFIX + JSON.stringify(message);
@@ -73,28 +73,39 @@ export class Publisher {
 
   private sayHello() {
     for (let iface of this.getInterfaces()) {
-      const message = new Buffer(this.getMessage(iface));
+      const message = new Buffer(this.buildMessage(iface.address));
       this.client.send(message, 0, message.length, PORT, iface.broadcast);
     }
   }
 
   private getInterfaces(): Interface[] {
-    const ips = [];
-    const interfaces: any = os.networkInterfaces();
-    return Object.keys(interfaces)
-      // filter ipv6 and internal interfaces
-      .map(key => interfaces[key].find((i: any) => i.family === 'IPv4'))
-      .filter(iface => !!iface)
-      .map((iface) => {
-        const i = Object.assign({}, iface);
-        i.broadcast = computeMulticast(iface);
-        return i;
-      });
+    return prepareInterfaces(os.networkInterfaces());
   }
 }
 
-function computeMulticast(iface: Interface): string {
-  const ip = iface.address + '/' + iface.netmask;
+export function prepareInterfaces(interfaces: any): Interface[] {
+  const set = new Set<string>();
+  return Object.keys(interfaces)
+    .map(key => interfaces[key] as any[])
+    .reduce((prev, current) => prev.concat(current))
+    .filter(iface => iface.family === 'IPv4')
+    .map(iface => {
+      return {
+        address: iface.address,
+        broadcast: computeMulticast(iface.address, iface.netmask),
+      };
+    })
+    .filter(iface => {
+      if (!set.has(iface.broadcast)) {
+        set.add(iface.broadcast);
+        return true;
+      }
+      return false;
+    });
+}
+
+function computeMulticast(address: string, netmask: string): string {
+  const ip = address + '/' + netmask;
   const block = new Netmask(ip);
   return block.broadcast;
 }
