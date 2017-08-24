@@ -15,7 +15,7 @@ export class Publisher {
   running: boolean = false;
   timer: any = null;
   client: any = null;
-  id: string;
+  id: string = null;
 
   constructor(
     public namespace: string,
