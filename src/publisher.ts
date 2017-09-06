@@ -24,7 +24,8 @@ export class Publisher {
     public interval: number = 2000
   ) {
     if (name.indexOf(':') >= 0) {
-      throw new Error('name can not contain ":"');
+      console.warn('name should not contain ":"');
+      name = name.replace(':', ' ');
     }
     this.id = Math.round(Math.random() * 1000000) + '';
   }
