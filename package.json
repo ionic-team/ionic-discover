@@ -17,7 +17,7 @@
     "watch": "npm run clean && tsc --watch & npm run sass-watch",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "github-release": "node ./scripts/create-github-release.js",
-    "test": "jest",
+    "test": "npm run build && jest",
     "deploy": "./node_modules/.bin/np"
   },
   "dependencies": {
