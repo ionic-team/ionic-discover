@@ -16,12 +16,13 @@ export class Publisher {
   timer: any = null;
   client: any = null;
   id: string = null;
+  interval: number = 2000;
+  path: string = '/';
 
   constructor(
     public namespace: string,
     public name: string,
     public port: number,
-    public interval: number = 2000
   ) {
     if (name.indexOf(':') >= 0) {
       console.warn('name should not contain ":"');
@@ -58,7 +59,7 @@ export class Publisher {
     this.client = null;
   }
 
-  buildMessage(address: string): string {
+  buildMessage(ip: string): string {
     const now = Date.now();
     const message = {
       t: now,
@@ -66,8 +67,9 @@ export class Publisher {
       nspace: this.namespace,
       name: this.name,
       host: os.hostname(),
-      ip: address,
-      port: this.port
+      ip: ip,
+      port: this.port,
+      path: this.path
     };
     return PREFIX + JSON.stringify(message);
   }

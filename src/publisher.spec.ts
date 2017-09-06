@@ -17,14 +17,10 @@ describe('publisher', () => {
     expect(p.namespace).toBe('devapp');
     expect(p.name).toBe('conference-app');
     expect(p.interval).toBe(2000);
+    expect(p.path).toBe('/');
     expect(p.port).toBe(8100);
     expect(p.id.length).toBeGreaterThan(0);
     expect(p.running).toBeFalsy();
-  });
-
-  it('create with interval', () => {
-    const p = new Publisher('devapp', 'conference-app', 8100, 10000);
-    expect(p.interval).toBe(10000);
   });
 
   it('start', () => {
@@ -53,6 +49,7 @@ describe('publisher', () => {
 
   it('buildMessage', () => {
     const p = new Publisher('devapp', 'conference-app', 8100);
+    p.path = '/?devapp=true';
     const now = Date.now();
     const message = p.buildMessage('192.168.0.1');
     const expected = 'ION_DP' + JSON.stringify({
@@ -62,7 +59,8 @@ describe('publisher', () => {
       name: 'conference-app',
       host: os.hostname(),
       ip: '192.168.0.1',
-      port: 8100
+      port: 8100,
+      path: '/?devapp=true'
     });
     expect(message).toBe(expected);
   });
