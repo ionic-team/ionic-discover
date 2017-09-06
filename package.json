@@ -18,7 +18,7 @@
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "github-release": "node ./scripts/create-github-release.js",
     "test": "jest",
-    "deploy": "np"
+    "deploy": "./node_modules/.bin/np"
   },
   "dependencies": {
     "netmask": "^1.0.6"
@@ -30,6 +30,7 @@
     "github": "^9.2.0",
     "ionic-cz-conventional-changelog": "^1.0.0",
     "jest": "^20.0.4",
+    "np": "^2.16.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.6.0",
     "tslint-ionic-rules": "0.0.11",
