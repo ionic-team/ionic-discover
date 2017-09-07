@@ -13,7 +13,7 @@ const FAKE_INTERFACE = {
 describe('publisher', () => {
   it('create', () => {
     const p = new Publisher('devapp', 'conference-app', 8100);
-    expect(p.client).toBeNull();
+    expect(p.client).toBeUndefined();
     expect(p.namespace).toBe('devapp');
     expect(p.name).toBe('conference-app');
     expect(p.interval).toBe(2000);
@@ -23,27 +23,23 @@ describe('publisher', () => {
     expect(p.running).toBeFalsy();
   });
 
-  it('start', () => {
+  it('start', async () => {
     const p = new Publisher('devapp', 'conference-app', 8100);
-    p.start(() => {
-      expect(p.timer).toBeDefined();
-      p.stop();
-      expect(p.timer).toBeNull();
-    });
-
+    await p.start();
+    expect(p.timer).toBeDefined();
+    p.stop();
+    expect(p.timer).toBeUndefined();
   }, 1000);
 
-  it('start/stop', () => {
+  it('start/stop', async () => {
     const p = new Publisher('devapp', 'conference-app', 8100);
-    p.start(() => {
-      fail('not should be called');
-    });
+    await p.start();
     expect(p.running).toBeTruthy();
     expect(p.client).toBeDefined();
 
     p.stop();
     expect(p.running).toBeFalsy();
-    expect(p.client).toBeNull();
+    expect(p.client).toBeUndefined();
 
   }, 1000);
 

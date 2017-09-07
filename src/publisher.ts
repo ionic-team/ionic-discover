@@ -1,6 +1,6 @@
-const os = require('os');
-const dgram = require('dgram');
-const Netmask = require('netmask').Netmask;
+import * as os from 'os';
+import * as dgram from 'dgram';
+import { Netmask } from 'netmask';
 
 const PREFIX = 'ION_DP';
 const PORT = 41234;
@@ -13,9 +13,9 @@ export interface Interface {
 export class Publisher {
 
   running: boolean = false;
-  timer: any = null;
-  client: any = null;
-  id: string = null;
+  timer?: number;
+  client?: dgram.Socket;
+  id: string;
   interval: number = 2000;
   path: string = '/';
 
@@ -28,35 +28,46 @@ export class Publisher {
       console.warn('name should not contain ":"');
       name = name.replace(':', ' ');
     }
-    this.id = Math.round(Math.random() * 1000000) + '';
+    this.id = String(Math.round(Math.random() * 1000000));
   }
 
-  start(callback?: Function) {
-    if (this.running) {
-      return;
-    }
-    this.running = true;
+  start(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (this.running) {
+        return;
+      }
+      this.running = true;
 
-    const client = this.client = dgram.createSocket('udp4');
-    client.on('listening', () => {
-      client.setBroadcast(true);
-      this.timer = setInterval(this.sayHello.bind(this), this.interval);
-      this.sayHello();
-      callback && callback();
+      const client = this.client = dgram.createSocket('udp4');
+      client.on('listening', () => {
+        client.setBroadcast(true);
+        this.timer = setInterval(this.sayHello.bind(this), this.interval);
+        this.sayHello().then(() => {
+          resolve();
+        }).catch(() => {
+          reject();
+        });
+      });
+      client.bind();
     });
-    client.bind();
   }
 
   stop() {
     if (!this.running) {
       return;
     }
+
     this.running = false;
 
-    clearInterval(this.timer);
-    this.timer = null;
-    this.client.close();
-    this.client = null;
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = undefined;
+    }
+
+    if (this.client) {
+      this.client.close();
+      this.client = undefined;
+    }
   }
 
   buildMessage(ip: string): string {
@@ -75,10 +86,26 @@ export class Publisher {
   }
 
   private sayHello() {
+    const promises: Promise<void>[] = [];
+
     for (let iface of this.getInterfaces()) {
       const message = new Buffer(this.buildMessage(iface.address));
-      this.client.send(message, 0, message.length, PORT, iface.broadcast);
+      promises.push(new Promise<void>((resolve, reject) => {
+        if (!this.client) {
+          return reject(new Error('no client'));
+        }
+
+        this.client.send(message, 0, message.length, PORT, iface.broadcast, err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      }));
     }
+
+    return Promise.all(promises);
   }
 
   private getInterfaces(): Interface[] {
