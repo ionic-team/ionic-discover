@@ -42,11 +42,7 @@ export class Publisher {
       client.on('listening', () => {
         client.setBroadcast(true);
         this.timer = setInterval(this.sayHello.bind(this), this.interval);
-        this.sayHello().then(() => {
-          resolve();
-        }).catch(() => {
-          reject();
-        });
+        this.sayHello();
       });
       client.bind();
     });
@@ -86,26 +82,13 @@ export class Publisher {
   }
 
   private sayHello() {
-    const promises: Promise<void>[] = [];
-
     for (let iface of this.getInterfaces()) {
       const message = new Buffer(this.buildMessage(iface.address));
-      promises.push(new Promise<void>((resolve, reject) => {
-        if (!this.client) {
-          return reject(new Error('no client'));
-        }
 
-        this.client.send(message, 0, message.length, PORT, iface.broadcast, err => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      }));
+      if (this.client) {
+        this.client.send(message, 0, message.length, PORT, iface.broadcast);
+      }
     }
-
-    return Promise.all(promises);
   }
 
   private getInterfaces(): Interface[] {
