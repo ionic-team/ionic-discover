@@ -44,7 +44,7 @@ export class Publisher extends events.EventEmitter implements IPublisher {
   start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       if (this.running) {
-        return;
+        return resolve();
       }
       this.running = true;
 
@@ -103,7 +103,9 @@ export class Publisher extends events.EventEmitter implements IPublisher {
 
       if (this.client) {
         this.client.send(message, 0, message.length, PORT, iface.broadcast, err => {
-          this.emit('error', err);
+          if (err) {
+            this.emit('error', err);
+          }
         });
       }
     }
