@@ -1,5 +1,7 @@
 import * as os from 'os';
 import * as dgram from 'dgram';
+import * as events from 'events';
+
 import { Netmask } from 'netmask';
 
 const PREFIX = 'ION_DP';
@@ -10,24 +12,32 @@ export interface Interface {
   broadcast: string;
 }
 
-export class Publisher {
+export interface IPublisher {
+  emit(event: "error", err: Error): boolean;
+  on(event: "error", listener: (err: Error) => void): this;
+}
 
-  running: boolean = false;
+export class Publisher extends events.EventEmitter implements IPublisher {
+  id: string;
+  path = '/';
+  running = false;
+  interval = 2000;
+
   timer?: number;
   client?: dgram.Socket;
-  id: string;
-  interval: number = 2000;
-  path: string = '/';
 
   constructor(
     public namespace: string,
     public name: string,
     public port: number,
   ) {
+    super();
+
     if (name.indexOf(':') >= 0) {
       console.warn('name should not contain ":"');
       name = name.replace(':', ' ');
     }
+
     this.id = String(Math.round(Math.random() * 1000000));
   }
 
@@ -39,11 +49,17 @@ export class Publisher {
       this.running = true;
 
       const client = this.client = dgram.createSocket('udp4');
+
+      client.on('error', err => {
+        this.emit('error', err);
+      });
+
       client.on('listening', () => {
         client.setBroadcast(true);
         this.timer = setInterval(this.sayHello.bind(this), this.interval);
         this.sayHello();
       });
+
       client.bind();
     });
   }
@@ -86,7 +102,9 @@ export class Publisher {
       const message = new Buffer(this.buildMessage(iface.address));
 
       if (this.client) {
-        this.client.send(message, 0, message.length, PORT, iface.broadcast);
+        this.client.send(message, 0, message.length, PORT, iface.broadcast, err => {
+          this.emit('error', err);
+        });
       }
     }
   }
