@@ -18,7 +18,8 @@
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "github-release": "node ./scripts/create-github-release.js",
     "test": "jest",
-    "deploy": "./node_modules/.bin/np"
+    "deploy": "./node_modules/.bin/np",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "netmask": "^1.0.6"
