@@ -58,6 +58,7 @@ export class Publisher extends events.EventEmitter implements IPublisher {
         client.setBroadcast(true);
         this.timer = setInterval(this.sayHello.bind(this), this.interval);
         this.sayHello();
+        resolve();
       });
 
       client.bind();
