@@ -4,13 +4,10 @@
     "declaration": true,
     "lib": ["dom", "es2015"],
     "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
     "outDir": "./dist",
-    "target": "es5",
-    "noImplicitAny": true,
-    "types": [
-      "node",
-      "jest"
-    ]
+    "target": "es6"
   },
   "include": [
     "src/**/*.ts"
