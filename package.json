@@ -1,6 +1,6 @@
 {
   "name": "@ionic/discover",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Simple UDP based protocol for service discovery implemented in pure JS. Not mDNS or bonjour. ",
   "main": "dist/index.js",
   "homepage": "https://ionicframework.com/",
