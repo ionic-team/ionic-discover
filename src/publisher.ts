@@ -99,14 +99,18 @@ export class Publisher extends events.EventEmitter implements IPublisher {
   }
 
   private sayHello() {
-    for (let iface of this.getInterfaces()) {
-      const message = new Buffer(this.buildMessage(iface.address));
+    try {
+      for (let iface of this.getInterfaces()) {
+        const message = new Buffer(this.buildMessage(iface.address));
 
-      this.client!.send(message, 0, message.length, PORT, iface.broadcast, err => {
-        if (err) {
-          this.emit('error', err);
-        }
-      });
+        this.client!.send(message, 0, message.length, PORT, iface.broadcast, err => {
+          if (err) {
+            this.emit('error', err);
+          }
+        });
+      }
+    } catch (e) {
+      this.emit('error', e);
     }
   }
 
