@@ -140,6 +140,14 @@ export function prepareInterfaces(interfaces: any): Interface[] {
     });
 }
 
+export function newSilentPublisher(namespace: string, name: string, port: number): Publisher {
+  name = `${name}@${port}`;
+  const service = new Publisher(namespace, name, port);
+  service.on('error', () => { });
+  service.start().catch(() => { });
+  return service;
+}
+
 function computeMulticast(address: string, netmask: string): string {
   const ip = address + '/' + netmask;
   const block = new Netmask(ip);
