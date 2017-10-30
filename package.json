@@ -3,6 +3,7 @@
   "version": "0.3.3",
   "description": "Simple UDP based protocol for service discovery implemented in pure JS. Not mDNS or bonjour. ",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "homepage": "https://ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (https://ionic.io)",
   "license": "MIT",

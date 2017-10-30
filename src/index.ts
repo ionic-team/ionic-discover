@@ -1,1 +1,1 @@
-export { Publisher, newSilentPublisher } from './publisher';
+export { Publisher, computeBroadcastAddress, newSilentPublisher } from './publisher';

@@ -25,6 +25,7 @@ export class Publisher extends events.EventEmitter implements IPublisher {
 
   timer?: number;
   client?: dgram.Socket;
+  interfaces?: Interface[];
 
   constructor(
     public namespace: string,
@@ -46,7 +47,12 @@ export class Publisher extends events.EventEmitter implements IPublisher {
       if (this.running) {
         return resolve();
       }
+
       this.running = true;
+
+      if (!this.interfaces) {
+        this.interfaces = this.getInterfaces();
+      }
 
       const client = this.client = dgram.createSocket('udp4');
 
@@ -98,9 +104,17 @@ export class Publisher extends events.EventEmitter implements IPublisher {
     return PREFIX + JSON.stringify(message);
   }
 
+  getInterfaces(): Interface[] {
+    return prepareInterfaces(os.networkInterfaces());
+  }
+
   private sayHello() {
+    if (!this.interfaces) {
+      throw new Error('No network interfaces set--was the service started?');
+    }
+
     try {
-      for (let iface of this.getInterfaces()) {
+      for (let iface of this.interfaces) {
         const message = new Buffer(this.buildMessage(iface.address));
 
         this.client!.send(message, 0, message.length, PORT, iface.broadcast, err => {
@@ -113,10 +127,6 @@ export class Publisher extends events.EventEmitter implements IPublisher {
       this.emit('error', e);
     }
   }
-
-  private getInterfaces(): Interface[] {
-    return prepareInterfaces(os.networkInterfaces());
-  }
 }
 
 export function prepareInterfaces(interfaces: any): Interface[] {
@@ -128,7 +138,7 @@ export function prepareInterfaces(interfaces: any): Interface[] {
     .map(iface => {
       return {
         address: iface.address,
-        broadcast: computeMulticast(iface.address, iface.netmask),
+        broadcast: computeBroadcastAddress(iface.address, iface.netmask),
       };
     })
     .filter(iface => {
@@ -148,7 +158,7 @@ export function newSilentPublisher(namespace: string, name: string, port: number
   return service;
 }
 
-function computeMulticast(address: string, netmask: string): string {
+export function computeBroadcastAddress(address: string, netmask: string): string {
   const ip = address + '/' + netmask;
   const block = new Netmask(ip);
   return block.broadcast;
